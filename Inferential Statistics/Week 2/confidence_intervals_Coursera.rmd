@@ -27,9 +27,9 @@ This will make sure your results don't change each time you knit, and it will al
 ensure reproducibility of your work (by setting the same seed it will be possible to 
 reproduce your results). You can set a seed like this:
 ```{r set-seed}
-set.seed(9102015)                 # make sure to change the seed
+set.seed(97564)                 # make sure to change the seed
 ```
-The number above is completely arbitraty. If you need inspiration, you can use your
+The number above is completely arbitrary. If you need inspiration, you can use your
 ID, birthday, or just a random string of numbers. The important thing is that you
 use each seed only once. You only need to do this once in your R Markdown document,
 but make sure it comes before sampling.
@@ -84,12 +84,13 @@ interpreted "typical" to mean.
 </div>
 ```{r describe-sample}
 # type your code for the Exercise here, and Knit
-
+summarise(samp)
+ggplot(data = samp, aes(x=area)) + geom_histogram(binwidth = 700)
 ```
 
 1. True or False: My distribution should be similar to others' distributions who also collect random samples from this population, but it is likely not exactly the same since it's a random sample.
 <ol>
-<li> True. </li>
+<li> <span style="color:red">True.</span> </li>
 <li> False. </li>
 </ol>
 
@@ -138,7 +139,7 @@ and *upper*. There are a few conditions that must be met for this interval to be
 <ol>
 <li> The sample is random. </li>
 <li> The sample size, 60, is less than 10% of all houses. </li>
-<li> The sample distribution must be nearly normal. </li>
+<li> <span style="color:red">The sample distribution must be nearly normal.</span> </li>
 </ol>
 
 
@@ -147,7 +148,7 @@ and *upper*. There are a few conditions that must be met for this interval to be
 3.  What does "95% confidence" mean?
 <ol>
 <li> 95% of the time the true average area of houses in Ames, Iowa, will be in this interval. </li>
-<li> 95% of random samples of size 60 will yield confidence intervals that contain the true average area of houses in Ames, Iowa. </li>
+<li> <span style="color:red">95% of random samples of size 60 will yield confidence intervals that contain the true average area of houses in Ames, Iowa.</span> </li>
 <li> 95% of the houses in Ames have an area in this interval. </li>
 <li> 95% confident that the sample mean is in this interval. </li>
 </ol>
@@ -168,14 +169,26 @@ Ames?
 </div>
 ```{r check-ci-contain-true-mean}
 # type your code for the Exercise here, and Knit
+lower = mean(samp$area) - z_star_95 * (sd(samp$area) / sqrt(nrow(samp)))
+upper = mean(samp$area) + z_star_95 * (sd(samp$area) / sqrt(nrow(samp)))
+pop_mu = mean(ames$area)
 
+print(c("The upper limit of the 95% confidence interval:",upper))
+print(c("The lower limit of the 95% confidence interval:",lower))
+print(c("The population mean:",pop_mu))
+
+if(pop_mu >= lower && pop_mu <= upper){
+  print("The population mean lies within the 95% confidence interval")
+}else{
+  print("The population mean does not lie within the 95% confidence interval")
+}
 ```
 
 4. What proportion of 95% confidence intervals would you expect to capture the true population mean?
 <ol>
 <li> 1% </li>
 <li> 5% </li>
-<li> 95% </li>
+<li> <span style="color:red">95%</span> </li>
 <li> 99% </li>
 </ol>
 
@@ -278,10 +291,12 @@ Is this proportion exactly equal to the confidence level? If not, explain why.
 <li> 0.99 </li> 
 <li> 1.96 </li>
 <li> 2.33 </li>
-<li> 2.58 </li>
+<li> <span style="color:red">2.58</span> </li>
 </ol>
 ```{r find-99-perc-crit-val}
 # type your code for the Question 5 here, and Knit
+z_cv_99 <- qnorm(0.995)
+z_cv_99
 
 ```
 
@@ -290,12 +305,28 @@ Is this proportion exactly equal to the confidence level? If not, explain why.
 </div>
 ```{r plot-99-perc-cis}
 # type your code for the Exercise here, and Knit
+ci_99 <- ames %>%
+        rep_sample_n(size = n, reps = 50, replace = TRUE) %>%
+        summarise(lower = mean(area) - z_cv_99 * (sd(area) / sqrt(n)),
+                  upper = mean(area) + z_cv_99 * (sd(area) / sqrt(n)))
 
+ci_99 <- ci_99 %>%
+  mutate(capture_mu = ifelse(lower < params$mu & upper > params$mu, "yes", "no"))
+
+ci_data_99 <- data.frame(ci_id = c(1:50, 1:50),
+                      ci_bounds = c(ci_99$lower, ci_99$upper),
+                      capture_mu = c(ci_99$capture_mu, ci_99$capture_mu))
+
+ggplot(data = ci_data_99, aes(x = ci_bounds, y = ci_id, 
+                           group = ci_id, color = capture_mu)) +
+  geom_point(size = 2) +  # add points at the ends, size = 2
+  geom_line() +           # connect with lines
+  geom_vline(xintercept = params$mu, color = "darkgray") # draw vertical line
 ```
 
 6. We would expect 99% of the intervals to contain the true population mean.
 <ol>
-<li> True </li>
+<li> <span style="color:red">True</span> </li>
 <li> False </li>
 </ol>
 
