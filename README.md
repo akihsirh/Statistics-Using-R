@@ -1,1 +1,1 @@
-# r-Stats
+Learning to analyze and visualize data in R. The end goal of this repository is to contain a portfolio of statistical data analysis projects and exercises in exploratory statistics, inferential statistics, bayesian statistics and linear regression using R
